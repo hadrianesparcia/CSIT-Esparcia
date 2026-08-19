@@ -16,7 +16,7 @@ class GradientContainer extends StatelessWidget {
         ])
       ),
       child: Center(
-        child:StyledText(),
+        child:StyledText('Hadrian Esparcia'),
           ),
     );
 
