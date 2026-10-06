@@ -3,7 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../models/expense.dart';
 import '../widgets/add_expense_sheet.dart';
-import '../widgets/expense_tile.dart';
+import '../widgets/category_filter_bar.dart';
+import '../widgets/common/adaptive_layout.dart';
+import '../widgets/common/centered_content.dart';
+import '../widgets/expense_list_section.dart';
+import '../widgets/total_card.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -85,11 +89,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _selectCategory(ExpenseCategory? category) {
+    setState(() {
+      _selectedCategory = category;
+    });
+  }
+
   void _showAddExpenseSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       showDragHandle: true,
+      constraints: const BoxConstraints(maxWidth: 600),
       builder: (context) {
         return AddExpenseSheet(onAddExpense: _addExpense);
       },
@@ -98,100 +110,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Expense Tracker',
-              style: GoogleFonts.poppins(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            Text(
-              'Manage your daily spending',
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            tooltip: widget.isDarkMode ? 'Light mode' : 'Dark mode',
-            onPressed: widget.onThemeToggle,
-            icon: Icon(
-              widget.isDarkMode
-                  ? Icons.light_mode_rounded
-                  : Icons.dark_mode_rounded,
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 950),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTotalCard(colorScheme),
-                const SizedBox(height: 24),
-                Text(
-                  'Filter by category',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                _buildCategoryFilters(),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Recent expenses',
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Text(
-                      '${_filteredExpenses.length} item(s)',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                if (_filteredExpenses.isEmpty)
-                  const EmptyState()
-                else
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: Column(
-                      key: ValueKey(_filteredExpenses.length),
-                      children: _filteredExpenses.map((expense) {
-                        return ExpenseTile(
-                          expense: expense,
-                          onDelete: () => _deleteExpense(expense),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+      appBar: _buildAppBar(),
+      body: SafeArea(
+        child: AdaptiveLayout(
+          compact: _buildCompactBody(),
+          wide: _buildWideBody(),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -205,98 +129,120 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTotalCard(ColorScheme colorScheme) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colorScheme.primary, colorScheme.secondary],
-        ),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-            color: colorScheme.primary.withValues(alpha: 0.20),
-          ),
-        ],
-      ),
-      child: Column(
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Total expenses',
+            'Expense Tracker',
             style: GoogleFonts.poppins(
-              color: colorScheme.onPrimary,
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 8),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 350),
-            child: Text(
-              '₱${_total.toStringAsFixed(2)}',
-              key: ValueKey(_total),
-              style: GoogleFonts.poppins(
-                color: colorScheme.onPrimary,
-                fontSize: 34,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
           Text(
-            'Keep track of where your money goes.',
+            'Manage your daily spending',
             style: GoogleFonts.poppins(
-              color: colorScheme.onPrimary.withValues(alpha: 0.85),
               fontSize: 12,
+              fontWeight: FontWeight.w400,
             ),
           ),
         ],
+      ),
+      actions: [
+        IconButton(
+          tooltip: widget.isDarkMode ? 'Light mode' : 'Dark mode',
+          onPressed: widget.onThemeToggle,
+          icon: Icon(
+            widget.isDarkMode
+                ? Icons.light_mode_rounded
+                : Icons.dark_mode_rounded,
+          ),
+        ),
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+
+  /// Phone portrait: everything in one scrolling column.
+  Widget _buildCompactBody() {
+    return CenteredContent(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TotalCard(total: _total),
+            const SizedBox(height: 24),
+            _buildFilterSection(wrap: false),
+            const SizedBox(height: 24),
+            _buildExpenseSection(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildCategoryFilters() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          ChoiceChip(
-            label: Text(
-              'All',
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-            ),
-            selected: _selectedCategory == null,
-            onSelected: (_) {
-              setState(() {
-                _selectedCategory = null;
-              });
-            },
-          ),
-          const SizedBox(width: 8),
-          ...ExpenseCategory.values.map(
-            (category) => Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: ChoiceChip(
-                avatar: Icon(category.icon, size: 17, color: category.color),
-                label: Text(
-                  category.label,
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+  /// Landscape / tablet: summary on the left, list on the right.
+  Widget _buildWideBody() {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1100),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 360,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 12, 100),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TotalCard(total: _total),
+                    const SizedBox(height: 24),
+                    _buildFilterSection(wrap: true),
+                  ],
                 ),
-                selected: _selectedCategory == category,
-                onSelected: (_) {
-                  setState(() {
-                    _selectedCategory = category;
-                  });
-                },
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(12, 12, 20, 100),
+                child: _buildExpenseSection(),
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildFilterSection({required bool wrap}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Filter by category',
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 10),
+        CategoryFilterBar(
+          selectedCategory: _selectedCategory,
+          onSelected: _selectCategory,
+          wrap: wrap,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExpenseSection() {
+    return ExpenseListSection(
+      expenses: _filteredExpenses,
+      onDelete: _deleteExpense,
     );
   }
 }
