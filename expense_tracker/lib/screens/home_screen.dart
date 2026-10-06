@@ -224,10 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Text(
           'Filter by category',
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
+          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 10),
         CategoryFilterBar(

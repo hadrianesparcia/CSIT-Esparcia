@@ -109,7 +109,10 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  if (isWide) ..._buildWideFields() else ..._buildCompactFields(),
+                  if (isWide)
+                    ..._buildWideFields()
+                  else
+                    ..._buildCompactFields(),
                   const SizedBox(height: 22),
                   _buildSaveButton(),
                 ],

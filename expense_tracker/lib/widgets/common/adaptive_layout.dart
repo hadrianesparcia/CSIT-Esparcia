@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'breakpoints.dart';
 
 /// Shows [compact] on narrow screens (phone portrait)
 /// and [wide] on wide screens (landscape, tablet).
 class AdaptiveLayout extends StatelessWidget {
-  const AdaptiveLayout({
-    super.key,
-    required this.compact,
-    required this.wide,
-  });
+  const AdaptiveLayout({super.key, required this.compact, required this.wide});
 
   final Widget compact;
   final Widget wide;
