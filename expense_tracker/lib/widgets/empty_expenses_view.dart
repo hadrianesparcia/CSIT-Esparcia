@@ -6,34 +6,37 @@ class EmptyExpensesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.receipt_long_rounded,
-              size: 64,
-              color: colorScheme.primary,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.receipt_long_rounded,
+            size: 50,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No expenses found',
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
             ),
-            const SizedBox(height: 12),
-            Text(
-              'No expenses found',
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Tap "Add expense" to create one.',
-              style: GoogleFonts.poppins(fontSize: 13),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Try another category or add a new expense.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(fontSize: 13),
+          ),
+        ],
       ),
     );
   }
