@@ -1,27 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:meals2/data/dummy_data.dart';
-import 'package:meals2/widgets/category_grid_item.dart';
- 
-class CategoriesScreen extends StatelessWidget{
-  const CategoriesScreen({super.key});
- 
+import '../data/dummy_data.dart';
+import '../models/category.dart';
+import '../models/meal.dart';
+import '../widgets/category_grid_item.dart';
+import 'meals.dart';
+
+class CategoriesScreen extends StatelessWidget {
+  const CategoriesScreen({
+    super.key,
+    required this.availableMeals,
+    required this.onToggleFavorite,
+    required this.isFavorite,
+  });
+
+  final List<Meal> availableMeals;
+  final void Function(Meal meal) onToggleFavorite;
+  final bool Function(Meal meal) isFavorite;
+
+  void _selectCategory(BuildContext context, Category category) {
+    final filteredMeals = availableMeals
+        .where((meal) => meal.categories.contains(category.id))
+        .toList();
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => MealsScreen(
+          title: category.title,
+          meals: filteredMeals,
+          onToggleFavorite: onToggleFavorite,
+          isFavorite: isFavorite,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(title: const Text('Pick your category'),),
-    body: GridView(
-      padding: EdgeInsets.all(24),
+    return GridView(
+      padding: const EdgeInsets.all(24),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 3/2,
-        mainAxisSpacing:  20,
+        childAspectRatio: 3 / 2,
         crossAxisSpacing: 20,
+        mainAxisSpacing: 20,
       ),
       children: [
         for (final category in availableCategories)
-          CategoryGridItem(category: category)
+          CategoryGridItem(
+            category: category,
+            onSelectCategory: () => _selectCategory(context, category),
+          ),
       ],
-    ),
-  );
+    );
   }
 }
