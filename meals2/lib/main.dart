@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'routes/app_routes.dart';
+import 'screens/about.dart';
+import 'screens/stats.dart';
 import 'screens/tabs.dart';
 
 void main() => runApp(const App());
@@ -17,7 +20,12 @@ class App extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      home: const TabsScreen(),
+      initialRoute: AppRoutes.home,
+      routes: {
+        AppRoutes.home: (ctx) => const TabsScreen(),
+        AppRoutes.about: (ctx) => const AboutScreen(),
+        AppRoutes.stats: (ctx) => const StatsScreen(),
+      },
     );
   }
 }
