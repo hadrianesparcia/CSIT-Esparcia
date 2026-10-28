@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:meals2/models/meal.dart';
-import 'package:meals2/providers/favorite_provider.dart';
+import 'package:meals2/providers/favorites_provider.dart';
 
 class MealDetailsScreen extends ConsumerWidget {
   const MealDetailsScreen({
@@ -14,6 +14,8 @@ class MealDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final favoriteMeals = ref.watch(favoriteMealsProvider);
+    final isFavorite = favoriteMeals.contains(meal);
     return Scaffold(
         appBar: AppBar(title: Text(meal.title), actions: [
           IconButton(
@@ -28,17 +30,31 @@ class MealDetailsScreen extends ConsumerWidget {
               ),
              );
             },
-            icon: const Icon(Icons.star),
+            icon: AnimatedSwitcher(
+              duration: Duration(milliseconds: 500), 
+              transitionBuilder: (child, animation){
+                return RotationTransition(
+                  turns: Tween(begin: 0.0, end: 0.2).animate(animation),
+                  child:child,
+                  );
+              },
+              child: Icon( isFavorite ? Icons.star : Icons.star_outline,
+              key: ValueKey(isFavorite)
+              ),
+            ),
           )
         ]),
         body: SingleChildScrollView(
           child: Column(
             children: [
-              Image.network(
+              Hero(
+                tag: meal.id,
+                child: Image.network(
                 meal.imageUrl,
                 height: 300,
                 width: double.infinity,
                 fit: BoxFit.cover,
+              ),
               ),
               const SizedBox(height: 14),
               Text(
