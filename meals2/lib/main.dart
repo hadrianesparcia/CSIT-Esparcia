@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
-import 'routes/app_routes.dart';
-import 'screens/about.dart';
-import 'screens/stats.dart';
-import 'screens/tabs.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:meals2/screens/tabs.dart';
 
-void main() => runApp(const App());
+final theme = ThemeData(
+  useMaterial3: true,
+  colorScheme: ColorScheme.fromSeed(
+    brightness: Brightness.dark,
+    seedColor: const Color.fromARGB(255, 131, 57, 0),
+  ),
+  textTheme: GoogleFonts.latoTextTheme(),
+);
+
+void main() {
+  runApp(const ProviderScope(child: App()));
+}
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -12,20 +22,8 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Meals',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepOrange,
-          brightness: Brightness.dark,
-        ),
-      ),
-      initialRoute: AppRoutes.home,
-      routes: {
-        AppRoutes.home: (ctx) => const TabsScreen(),
-        AppRoutes.about: (ctx) => const AboutScreen(),
-        AppRoutes.stats: (ctx) => const StatsScreen(),
-      },
+      theme: theme,
+      home: const TabsScreen(),
     );
   }
 }
